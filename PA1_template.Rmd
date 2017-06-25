@@ -89,3 +89,15 @@ makeHistogram(stepsPerDayNARep)
 The *mean* is `r mean(stepsPerDayNARep$steps)` and the *Median* is `r median(stepsPerDayNARep$steps)`
 
 ## Are there differences in activity patterns between weekdays and weekends?
+```{r echo=TRUE}
+addWeekdayColumn <- function(row) {
+  summary(row)
+  if(weekdays(row.date) %in% c("Sunday","Saturday")) {
+    row.week <- "weekend"
+  } else {
+    row.week <- "weekday"
+  }
+}
+
+apply(activityNARep, MARGIN=1, FUN=addWeekdayColumn)
+```
