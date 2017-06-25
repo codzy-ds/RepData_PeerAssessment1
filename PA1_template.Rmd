@@ -8,18 +8,84 @@ output:
 
 ## Loading and preprocessing the data
 
+#### unzip the dataset
+```{r echo=TRUE}
+if(!dir.exists('./data')) {
+  dir.create('./data')
+}
 
+if(!file.exists('data/activity.csv')) {
+  unzip('activity.zip', exdir = './data')
+}
+```
+
+#### Load the data into activity variable
+```{r echo=TRUE}
+activity <- read.csv('./data/activity.csv')
+activityWoNA <- na.omit(activity)
+```
 
 ## What is mean total number of steps taken per day?
 
+Aggregate sum of steps per days and calculate mean and median
+```{r echo=TRUE}
+stepsPerDay <- aggregate(steps~date, data = activityWoNA, FUN = sum)
+stepsPerDayMean <- mean(stepsPerDay$steps)
+stepsPerDayMedian <-  median(stepsPerDay$steps)
+```
 
+Make a function to create the histogram
+```{r echo=TRUE} 
+library("ggplot2")
+makeHistogram <- function(data) {
+  stepsPerDayPlot <- ggplot(data = data, aes(x=steps))
+  stepsPerDayPlot + geom_histogram(binwidth = 5000,colour="darkgreen", fill="lightgreen",alpha=0.4) +
+                    ggtitle("Distribution of steps per day") + ylab("Frequency") + xlab("Total steps")
+}
+```
+
+Histogram with ggplot2
+``` {r echo=TRUE, fig.withd=10, fig.height=5, fig.align="center"}
+makeHistogram(stepsPerDay)
+```
+
+The *mean* is `r mean(stepsPerDay$steps)` and the *Median* is `r median(stepsPerDay$steps)`
 
 ## What is the average daily activity pattern?
 
+aggregate data by intervals
+```{r echo=TRUE, fig.withd=10, fig.height=5, fig.align="center"}
+meanStepsPerIntervals <- aggregate(steps~interval, data=activityWoNA, FUN = mean)
+meanStepsIntervalsPlot <- ggplot(data=meanStepsPerIntervals, aes(x=interval,y=steps))
+meanStepsIntervalsPlot+geom_line(color="#66cdaa")
+intervalWithMax <- meanStepsPerIntervals[which.max(meanStepsPerIntervals$steps),]$interval
+```
 
+The **interval** with *max mean* steps is **`r intervalWithMax`**
 
 ## Imputing missing values
 
+1. Get the total missing values
+```{r echo=TRUE}
+totalMissingValues <- activity$steps[is.na(activity$steps)]
+```
 
+There are **`r length(totalMissingValues)`** missing values.
+
+2-3. Replace missing values with the mean in a new dataset
+```{r echo=TRUE}
+activityNARep <- merge(activity, meanStepsPerIntervals, by="interval")
+activityNARep$steps.x[is.na(activityNARep$steps.x)] <- activityNARep$steps.y[is.na(activityNARep$steps.x)]
+activityNARep$steps <- activityNARep$steps.x
+activityNARep <- activityNARep[,c("interval", "date", "steps")]
+```
+
+4. Make a Histogram report
+```{r echo=TRUE}
+stepsPerDayNARep <- aggregate(steps~date, data = activityNARep, FUN = sum)
+makeHistogram(stepsPerDayNARep)
+```
+
+The *mean* is `r mean(stepsPerDayNARep$steps)` and the *Median* is `r median(stepsPerDayNARep$steps)`
 
 ## Are there differences in activity patterns between weekdays and weekends?
