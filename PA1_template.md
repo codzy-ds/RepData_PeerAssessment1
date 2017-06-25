@@ -1,15 +1,11 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 
 ## Loading and preprocessing the data
 
 #### unzip the dataset
-```{r echo=TRUE}
+
+```r
 if(!dir.exists('./data')) {
   dir.create('./data')
 }
@@ -20,7 +16,8 @@ if(!file.exists('data/activity.csv')) {
 ```
 
 #### Load the data into activity variable
-```{r echo=TRUE}
+
+```r
 activity <- read.csv('./data/activity.csv')
 activityWoNA <- na.omit(activity)
 ```
@@ -28,14 +25,16 @@ activityWoNA <- na.omit(activity)
 ## What is mean total number of steps taken per day?
 
 Aggregate sum of steps per days and calculate mean and median
-```{r echo=TRUE}
+
+```r
 stepsPerDay <- aggregate(steps~date, data = activityWoNA, FUN = sum)
 stepsPerDayMean <- mean(stepsPerDay$steps)
 stepsPerDayMedian <-  median(stepsPerDay$steps)
 ```
 
 Make a function to create the histogram
-```{r echo=TRUE} 
+
+```r
 library("ggplot2")
 makeHistogram <- function(data) {
   stepsPerDayPlot <- ggplot(data = data, aes(x=steps))
@@ -45,35 +44,46 @@ makeHistogram <- function(data) {
 ```
 
 Histogram with ggplot2
-``` {r echo=TRUE, fig.withd=10, fig.height=5, fig.align="center"}
+
+```r
 makeHistogram(stepsPerDay)
 ```
 
-The *mean* is `r mean(stepsPerDay$steps)` and the *Median* is `r median(stepsPerDay$steps)`
+<img src="PA1_template_files/figure-html/unnamed-chunk-5-1.png" style="display: block; margin: auto;" />
+
+The *mean* is 1.0766189\times 10^{4} and the *Median* is 10765
 
 ## What is the average daily activity pattern?
 
 aggregate data by intervals
-```{r echo=TRUE, fig.withd=10, fig.height=5, fig.align="center"}
+
+```r
 meanStepsPerIntervals <- aggregate(steps~interval, data=activityWoNA, FUN = mean)
 meanStepsIntervalsPlot <- ggplot(data=meanStepsPerIntervals, aes(x=interval,y=steps))
 meanStepsIntervalsPlot+geom_line(color="#66cdaa")
+```
+
+<img src="PA1_template_files/figure-html/unnamed-chunk-6-1.png" style="display: block; margin: auto;" />
+
+```r
 intervalWithMax <- meanStepsPerIntervals[which.max(meanStepsPerIntervals$steps),]$interval
 ```
 
-The **interval** with *max mean* steps is **`r intervalWithMax`**
+The **interval** with *max mean* steps is **835**
 
 ## Imputing missing values
 
 1. Get the total missing values
-```{r echo=TRUE}
+
+```r
 totalMissingValues <- activity$steps[is.na(activity$steps)]
 ```
 
-There are **`r length(totalMissingValues)`** missing values.
+There are **2304** missing values.
 
 2-3. Replace missing values with the mean in a new dataset
-```{r echo=TRUE}
+
+```r
 activityNARep <- merge(activity, meanStepsPerIntervals, by="interval")
 activityNARep$steps.x[is.na(activityNARep$steps.x)] <- activityNARep$steps.y[is.na(activityNARep$steps.x)]
 activityNARep$steps <- activityNARep$steps.x
@@ -81,17 +91,23 @@ activityNARep <- activityNARep[,c("interval", "date", "steps")]
 ```
 
 4. Make a Histogram report
-```{r echo=TRUE, fig.withd=10, fig.height=5, fig.align="center"}
+
+```r
 stepsPerDayNARep <- aggregate(steps~date, data = activityNARep, FUN = sum)
 makeHistogram(stepsPerDayNARep)
 ```
 
-The *mean* is `r mean(stepsPerDayNARep$steps)` and the *Median* is `r median(stepsPerDayNARep$steps)`
+<img src="PA1_template_files/figure-html/unnamed-chunk-9-1.png" style="display: block; margin: auto;" />
+
+The *mean* is 1.0766189\times 10^{4} and the *Median* is 1.0766189\times 10^{4}
 
 ## Are there differences in activity patterns between weekdays and weekends?
-```{r echo=TRUE, fig.withd=10, fig.height=5, fig.align="center"}
+
+```r
 activityNARep$typeOfDay <- ifelse(weekdays(as.Date(activityNARep$date,"%Y-%m-%d")) %in% c("dimanche", "samedi"), "weekend", "weekday")
 stepsIntervalPerTypeOfDay <- aggregate(steps~interval+typeOfDay, activityNARep, FUN=mean)
 weekDaysPlot <- ggplot(stepsIntervalPerTypeOfDay, aes(x=interval, y=steps, colour=factor(typeOfDay)))
 weekDaysPlot + geom_line() + facet_wrap(~ typeOfDay, ncol=1)
 ```
+
+<img src="PA1_template_files/figure-html/unnamed-chunk-10-1.png" style="display: block; margin: auto;" />
