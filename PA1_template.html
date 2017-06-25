@@ -188,6 +188,7 @@ makeHistogram(stepsPerDayNARep)</code></pre>
 </div>
 <div id="are-there-differences-in-activity-patterns-between-weekdays-and-weekends" class="section level2">
 <h2>Are there differences in activity patterns between weekdays and weekends?</h2>
+<p>Add a column with label <em>weekday</em> and <em>weekend</em> and aggregate the mean value per interval and the new column. Produce a graph faceted by the new column (typeOfDay).</p>
 <pre class="r"><code>activityNARep$typeOfDay &lt;- ifelse(weekdays(as.Date(activityNARep$date,&quot;%Y-%m-%d&quot;)) %in% c(&quot;dimanche&quot;, &quot;samedi&quot;), &quot;weekend&quot;, &quot;weekday&quot;)
 stepsIntervalPerTypeOfDay &lt;- aggregate(steps~interval+typeOfDay, activityNARep, FUN=mean)
 weekDaysPlot &lt;- ggplot(stepsIntervalPerTypeOfDay, aes(x=interval, y=steps, colour=factor(typeOfDay)))

@@ -89,6 +89,9 @@ makeHistogram(stepsPerDayNARep)
 The *mean* is `r mean(stepsPerDayNARep$steps)` and the *Median* is `r median(stepsPerDayNARep$steps)`
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+Add a column with label *weekday*  and *weekend* and aggregate the mean value per interval and the new column.
+Produce a graph faceted by the new column (typeOfDay).
 ```{r echo=TRUE, fig.withd=10, fig.height=5, fig.align="center"}
 activityNARep$typeOfDay <- ifelse(weekdays(as.Date(activityNARep$date,"%Y-%m-%d")) %in% c("dimanche", "samedi"), "weekend", "weekday")
 stepsIntervalPerTypeOfDay <- aggregate(steps~interval+typeOfDay, activityNARep, FUN=mean)

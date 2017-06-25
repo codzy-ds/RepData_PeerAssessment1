@@ -103,6 +103,9 @@ The *mean* is 1.0766189\times 10^{4} and the *Median* is 1.0766189\times 10^{4}
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
+Add a column with label *weekday*  and *weekend* and aggregate the mean value per interval and the new column.
+Produce a graph faceted by the new column (typeOfDay).
+
 ```r
 activityNARep$typeOfDay <- ifelse(weekdays(as.Date(activityNARep$date,"%Y-%m-%d")) %in% c("dimanche", "samedi"), "weekend", "weekday")
 stepsIntervalPerTypeOfDay <- aggregate(steps~interval+typeOfDay, activityNARep, FUN=mean)
